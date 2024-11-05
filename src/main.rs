@@ -5,6 +5,29 @@ struct Node<T> {
 }
 
 impl<T: Ord + std::fmt::Debug> Node<T> {
+    fn count_nodes_and_leaves(&self,nodes: &mut i32, leaves: &mut i32) {
+        *nodes += 1;
+        match (&self.left, &self.right) {
+            (Some(left), Some(right)) => {
+                // Recursively count in both subtrees
+                left.count_nodes_and_leaves(nodes, leaves);
+                right.count_nodes_and_leaves(nodes, leaves);
+            }
+            (Some(left), None) => {
+                // Left child only
+                left.count_nodes_and_leaves(nodes, leaves);
+            }
+            (None, Some(right)) => {
+                // Right child only
+                right.count_nodes_and_leaves(nodes, leaves);
+            }
+            (None, None) => {
+                // Leaf node (no children)
+                *leaves += 1;
+            }
+        }
+    }
+
     fn insert(&mut self, value: T) {
         if value < self.value {
             // insere na subarvore da esquerda
@@ -98,11 +121,21 @@ impl<T: Ord + std::fmt::Debug> Node<T> {
 
 struct BinaryTree<T> {
     root: Option<Box<Node<T>>>,
+    nodes: i32,
+    leaves: i32,
 }
 
 impl<T: Ord + std::fmt::Debug> BinaryTree<T> {
     fn new() -> Self {
-        BinaryTree { root: None }
+        BinaryTree { root: None, nodes: 0, leaves: 0}
+    }
+
+    fn count_nodes_and_leaves(&mut self) {
+        if let Some(ref mut root) = self.root {
+            root.count_nodes_and_leaves(&mut self.nodes, &mut self.leaves);
+            println!("Number of nodes: {}", self.nodes);
+            println!("Number of leaves: {}", self.leaves);
+        }
     }
     
     fn insert(&mut self, value: T) {
@@ -189,4 +222,6 @@ fn main() {
     } else {
         println!("tree empty lol");
     }
+
+    tree.count_nodes_and_leaves();
 } 
